@@ -6,10 +6,11 @@ from typing import Iterator
 from langchain.docstore.document import Document
 from langchain.document_loaders.base import BaseBlobParser
 from langchain.document_loaders.blob_loaders.schema import Blob
+import warnings
  
 class XLSXExcelParser(BaseBlobParser, ABC):
     def lazy_parse(self, blob: Blob) -> Iterator[Document]:
- 
+        warnings.simplefilter(action='ignore', category=UserWarning)
         with blob.as_bytes_io() as file:
             if blob.mimetype == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
                 wb = load_workbook(file, data_only=True)
@@ -24,7 +25,7 @@ class XLSXExcelParser(BaseBlobParser, ABC):
  
 class XLSExcelParser(BaseBlobParser, ABC):
     def lazy_parse(self, blob: Blob) -> Iterator[Document]:
- 
+        warnings.simplefilter(action='ignore', category=UserWarning)
         with blob.as_bytes_io() as file:
             if blob.mimetype == "application/vnd.ms-excel":
                 wb = pd.read_excel(file, sheet_name=None, engine='xlrd')
@@ -38,6 +39,7 @@ class XLSExcelParser(BaseBlobParser, ABC):
  
 class CSVParser(BaseBlobParser):
     def lazy_parse(self, blob: Blob) -> Iterator[Document]:
+        warnings.simplefilter(action='ignore', category=UserWarning)
         with blob.as_bytes_io() as file:
             if blob.mimetype == "text/csv":
                 df = pd.read_csv(file)
