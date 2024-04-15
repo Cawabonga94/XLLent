@@ -16,13 +16,17 @@ class XLSXExcelParser(BaseBlobParser, ABC):
                 wb = load_workbook(file, data_only=True)
             content = {}
             for page in wb.sheetnames:
-                df = pd.read_excel(file, sheet_name=page, engine='openpyxl')  
-                sheet_data_list = df.to_dict(orient='records')
-                content[page] = sheet_data_list
+                df = pd.read_excel(file, sheet_name=page, keep_default_na=False, engine='openpyxl')
+                df.dropna(axis=0, how='all', inplace=True)  
+                df.dropna(axis=1, how='all', inplace=True)  
+                sheet_data_list = df.to_dict(orient='records')  
+                filtered_data_list = [{key: value for key, value in record.items() if value != ''} for record in sheet_data_list]
+                filtered_data_list = [record for record in filtered_data_list if record]  
+                if filtered_data_list:  
+                    content[page] = filtered_data_list
  
         content = str(content)
         yield Document(page_content=content, metadata={})
- 
 class XLSExcelParser(BaseBlobParser, ABC):
     def lazy_parse(self, blob: Blob) -> Iterator[Document]:
         warnings.simplefilter(action='ignore', category=UserWarning)
