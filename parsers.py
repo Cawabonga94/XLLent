@@ -20,7 +20,11 @@ class XLSXExcelParser(BaseBlobParser, ABC):
                 df.dropna(axis=0, how='all', inplace=True)  
                 df.dropna(axis=1, how='all', inplace=True)  
                 sheet_data_list = df.to_dict(orient='records')  
-                filtered_data_list = [{key: value for key, value in record.items() if value != ''} for record in sheet_data_list]
+                filtered_data_list = [
+                    {key: value.replace('\n', '') if isinstance(value, str) else value
+                     for key, value in record.items() if value != ''}
+                    for record in sheet_data_list
+                ]
                 filtered_data_list = [record for record in filtered_data_list if record]  
                 if filtered_data_list:  
                     content[page] = filtered_data_list
@@ -39,7 +43,7 @@ class XLSExcelParser(BaseBlobParser, ABC):
                 content[sheet_name] = sheet_data_list
  
         content = str(content)
-        yield Document(page_content=content, metadata={})
+        yield Document(page_content=content.replace('\n', ''), metadata={})
  
 class CSVParser(BaseBlobParser):
     def lazy_parse(self, blob: Blob) -> Iterator[Document]:
