@@ -16,7 +16,6 @@ class XLSXExcelParser(BaseBlobParser, ABC):
         with blob.as_bytes_io() as file:
             if blob.mimetype == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
                 wb = load_workbook(file, data_only=True)
-                log.info(wb)
             for page in wb.sheetnames:
                 df = pd.read_excel(file, sheet_name=page, keep_default_na=False,engine='openpyxl')
                 df.dropna(axis=0, how='all', inplace=True)  
