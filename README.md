@@ -1,6 +1,6 @@
 # XLLent
 
-This plugin permit to segment XLS, XLSX and csv documents in the rabbithole
+This plugin permit to segment XLS, XLSX and csv documents in the rabbithole and increase the chunk size
 
 ## Usage
 1. upload a xlsx or xls file

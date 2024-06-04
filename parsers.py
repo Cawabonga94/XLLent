@@ -16,22 +16,28 @@ class XLSXExcelParser(BaseBlobParser, ABC):
         with blob.as_bytes_io() as file:
             if blob.mimetype == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
                 wb = load_workbook(file, data_only=True)
+                
             for page in wb.sheetnames:
-                df = pd.read_excel(file, sheet_name=page, keep_default_na=False,engine='openpyxl')
-                df.dropna(axis=0, how='all', inplace=True)  
-                df.dropna(axis=1, how='all', inplace=True)  
-                sheet_data_list = df.to_dict(orient='records')  
+                df = pd.read_excel(file, sheet_name=page, keep_default_na=False, engine='openpyxl')
+                df.dropna(axis=0, how='all', inplace=True)
+                df.dropna(axis=1, how='all', inplace=True)
+                sheet_data_list = df.to_dict(orient='records')
                 filtered_data_list = [
-                        {key: value if not isinstance(value, str) else value
-                         for key, value in record.items() if value != ''}
-                        for record in sheet_data_list
-                    ]
-                filtered_data_list = [record for record in filtered_data_list if record]  
+                    {key: value if not isinstance(value, str) else value
+                        for key, value in record.items() if value != ''}
+                    for record in sheet_data_list
+                ]
+                filtered_data_list = [record for record in filtered_data_list if record]
                 for record in filtered_data_list:
                     for key, value in record.items():
-                        if isinstance(value, datetime.datetime):
-                            record[key] = value.strftime('%d %m %Y %h, %H:%M:%S')
-                    yield Document(page_content=str(record).replace(r"\n"," "), metadata={})
+                        if isinstance(value, datetime.datetime) and not pd.isna(value):
+                            record[key] = value.strftime('%d %m %Y %I, %H:%M:%S')
+                        if "  " in value:
+                            for i in value:
+                                if i=="   ":
+                                    i.replace(" ")
+
+                    yield Document(page_content=str(record).replace(r"\n", " "), metadata={})
 
 class XLSExcelParser(BaseBlobParser, ABC):
     def lazy_parse(self, blob: Blob) -> Iterator[Document]:
