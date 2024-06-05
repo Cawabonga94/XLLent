@@ -32,7 +32,7 @@ class XLSXExcelParser(BaseBlobParser, ABC):
                     for key, value in record.items():
                         if isinstance(value, datetime.datetime) and not pd.isna(value):
                             record[key] = value.strftime('%d %m %Y %I, %H:%M:%S')
-                        if "  " in value:
+                        if isinstance(value, str) and "  " in value:
                             for i in value:
                                 if i=="   ":
                                     i.replace(" ")
