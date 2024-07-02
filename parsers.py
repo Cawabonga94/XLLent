@@ -37,7 +37,7 @@ class XLSXExcelParser(BaseBlobParser, ABC):
                                 if i=="   ":
                                     i.replace(" ")
 
-                    yield Document(page_content=str(record).replace(r"\n", " "), metadata={})
+                    yield Document(page_content=str(record).replace(r"\n", " "), metadata={"source": blob.source})
 
 class XLSExcelParser(BaseBlobParser, ABC):
     def lazy_parse(self, blob: Blob) -> Iterator[Document]:
@@ -48,7 +48,7 @@ class XLSExcelParser(BaseBlobParser, ABC):
             for sheet_name, sheet_data in wb.items():
                 sheet_data_list = sheet_data.to_dict(orient='records')
                 for record in sheet_data_list:
-                    yield Document(page_content=str(record), metadata={})
+                    yield Document(page_content=str(record), metadata={"source": blob.source})
 
 class CSVParser(BaseBlobParser):
     def lazy_parse(self, blob: Blob) -> Iterator[Document]:
@@ -58,4 +58,4 @@ class CSVParser(BaseBlobParser):
                 df = pd.read_csv(file)
                 content = df.to_dict(orient='records')
                 for record in content:
-                    yield Document(page_content=str(record), metadata={})
+                    yield Document(page_content=str(record), metadata={"source": blob.source})
